@@ -1,5 +1,5 @@
 import numpy as np
 
-x = np.ones((50, 10, 700))
-
-print(x)
+x = np.ones((3, 1))
+y = np.ones((1, 3))
+print(x + y)
