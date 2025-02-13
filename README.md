@@ -1,2 +1,2 @@
 # ndarray
-Basic implementation of Numpy's ndarray.
+~~Basic implementation of Numpy's ndarray.~~  This didn't go as planned. I was trying to implement ndarray with SIMD intrinsics, but I couldn't really figure it out. Not sure how to do it while handling brodcasting, so for now, just going to leave this here and maybe I'll come back to it at another point. Right now, even though it's not fully implemented, I implemented ndarray without the SIMD intrinsics. I didn't time it, but I am assuming it'll be pretty slow for large arrays. 
