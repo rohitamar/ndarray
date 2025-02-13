@@ -5,9 +5,7 @@
 template<typename T>
 class ND {
     public:
-
     ND<T> operator+(ND<T> a) {
-
         if(shape_.size() != a.shape().size()) {
             throw std::invalid_argument("Cannot brodcast shapes.");
         }
@@ -30,6 +28,7 @@ class ND {
         for(int i = (int) stridesS.size() - 2; i >= 0; i--) {
             stridesS[i] = stridesS[i + 1] * shapeS[i + 1];
         }
+
         auto decomp = [shapeS, stridesS](size_t i) {
             std::vector<size_t> ind(shapeS.size());
             for(size_t j = 0; j < shapeS.size(); j++) {
@@ -49,11 +48,11 @@ class ND {
         };
 
         ND<T> S(shapeS);
-        // assume contiguous for now
         for(size_t i = 0; i < tot; i++) {
             size_t x = comp(decomp(i), strides_, shape_);
             size_t y = comp(decomp(i), a.strides(), shapeA);
             S.data_[i] = data_[x] + a.data_[y];
+            std::cout << x << " " << y << "\n";
         }
 
         return S;
@@ -109,7 +108,7 @@ class ND {
         std::vector<size_t> shapeT = shape_, stridesT = strides_;
         reverse(shapeT.begin(), shapeT.end());
         reverse(stridesT.begin(), stridesT.end());
-        ND<T> ret(data_, shapeT, stridesT);
+        ND<T> ret(data_, shapeT, stridesT, offset_, false);
         return ret;
     }
 
