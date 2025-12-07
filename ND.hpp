@@ -1,6 +1,9 @@
-#include <iostream>
-#include <vector>
 #include <algorithm>
+#include <iostream>
+#include <thread>
+#include <vector>
+
+#include "Adder.hpp"
 
 template<typename T>
 class ND {
@@ -11,49 +14,31 @@ class ND {
         }
 
         std::vector<size_t> shapeA = a.shape();
+    
         std::vector<size_t> shapeS(shapeA.size());
-
         size_t tot = 1;
         for(size_t i = 0; i < a.shape().size(); i++) {
             if(shape_[i] == shapeA[i] || shape_[i] == 1 || shapeA[i] == 1) {
                 shapeS[i] = std::max(shape_[i], shapeA[i]);
                 tot *= shapeS[i];
-                continue;
+            } else {
+                throw std::invalid_argument("Cannot brodcast shapes.");
             }
-            throw std::invalid_argument("Cannot brodcast shapes.");
         }
-
-        std::vector<size_t> stridesS(a.shape().size());
-        stridesS[stridesS.size() - 1] = 1;
-        for(int i = (int) stridesS.size() - 2; i >= 0; i--) {
-            stridesS[i] = stridesS[i + 1] * shapeS[i + 1];
-        }
-
-        auto decomp = [shapeS, stridesS](size_t i) {
-            std::vector<size_t> ind(shapeS.size());
-            for(size_t j = 0; j < shapeS.size(); j++) {
-                ind[j] = i / stridesS[j];
-                i = i % stridesS[j];
-            }
-            return ind;
-        };
-
-        auto comp = [](std::vector<size_t> s, std::vector<size_t> strides, std::vector<size_t> shape) {
-            size_t ret = 0;
-            for(size_t j = 0; j < s.size(); j++) {
-                if(shape[j] == 1) continue;
-                ret += s[j] * strides[j];
-            }
-            return ret;
-        };
 
         ND<T> S(shapeS);
-        for(size_t i = 0; i < tot; i++) {
-            size_t x = comp(decomp(i), strides_, shape_);
-            size_t y = comp(decomp(i), a.strides(), shapeA);
-            S.data_[i] = data_[x] + a.data_[y];
-            std::cout << x << " " << y << "\n";
-        }
+        std::vector<size_t> s_stride = S.strides();
+
+        threaded_normal_add(
+            data_,
+            strides_,
+            shape_,
+            a.data(),
+            a.strides(),
+            a.shape(),
+            S.data_,
+            s_stride
+        );
 
         return S;
     }
